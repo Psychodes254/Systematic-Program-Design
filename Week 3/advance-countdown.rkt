@@ -9,14 +9,16 @@
 ;; =================
 ;; Constants:
 
-(define WIDTH 200)
+(define WIDTH 100)
 (define HEIGHT WIDTH)
+
 (define TEXT-SIZE 20)
 (define TEXT-COLOUR "black")
+
 (define CTR-Y (/ HEIGHT 2))
 (define CTR-X (/ WIDTH 2))
+
 (define MTS (empty-scene WIDTH HEIGHT))
-(define CD 1000)
 
 ;; =================
 ;; Data definitions:
@@ -40,17 +42,18 @@
 ;; Functions:
 
 ;; Countdown -> Countdown
-;; start world with (main CD)
+;; start world with (main 10)
 (define (main CD)
   (big-bang CD                              ; Countdown
-            (on-tick   advance-countdown)   ; Countdown -> Countdown
+            (on-tick   advance-countdown 1)   ; Countdown -> Countdown
             (to-draw   render-countdown)  ; Countdown -> Image
             (on-mouse  handle-mouse)))        ; Countdown Integer Integer MouseEvent -> Countdown
 
 ;; Countdown -> Countdown
 ;; produce the next number by advancing it to 1 number less before it reaches zero 
-(check-expect (advance-countdown 0)  0)
 (check-expect (advance-countdown 10) 9)
+(check-expect (advance-countdown 1) 0)
+(check-expect (advance-countdown 0)  0)
 
 (define (advance-countdown CD)
   (if (= CD 0)0
@@ -59,6 +62,10 @@
 ;; Countdown -> Image
 ;; render the number at an approriate place on the MTS 
 (check-expect (render-countdown 7) (place-image (text (number->string 7) TEXT-SIZE TEXT-COLOUR)
+               CTR-X
+               CTR-Y
+               MTS))
+(check-expect (render-countdown 0) (place-image (text (number->string 0) TEXT-SIZE TEXT-COLOUR)
                CTR-X
                CTR-Y
                MTS))
@@ -73,11 +80,12 @@
 
 ; Countdown Integer Integer MouseEvent -> Countdown
 ;; produce 0 if me is button-down, otherwise produce cd
-(check-expect (handle-mouse 2 0 3 "button-down") 0)
-(check-expect (handle-mouse 3 2 0 "button-up") 3)
+(check-expect (handle-mouse 0 0 3 "button-down") 10)
+(check-expect (handle-mouse 5 0 3 "button-down") 10)
+(check-expect (handle-mouse 5 2 0 "button-up") 5)
 
 ;(define (handle-mouse cd x y me) CD) ;stub
 
 (define (handle-mouse CD x y me)
-  (cond [(mouse=? me "button-down") 0]
+  (cond [(mouse=? me "button-down") 10]
         [else CD]))
