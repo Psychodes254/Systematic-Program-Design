@@ -28,7 +28,7 @@
 ;; =================
 ;; Functions:
 
-;; Number -> Number
+;; ListOfNumber -> Number
 ;; produces number times 2
 (check-expect (double-all LON1) empty)
 (check-expect (double-all LON2) (cons 36 empty))
