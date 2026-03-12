@@ -1,6 +1,6 @@
 ;; The first three lines of this file were inserted by DrRacket. They record metadata
 ;; about the language level of this file in a form that our tools can easily process.
-#reader(lib "htdp-beginner-reader.ss" "lang")((modname image-organizer-starter) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname image-organizer-starter) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
 (require 2htdp/image)
 ;; image-organizer-starter.rkt
 
@@ -41,83 +41,66 @@
 
 ;; Templates
 #;
-(define (fn-for-dir d)
-  (... (dir-name d)       
-       (fn-for-lod (dir-sub-dirs d))
-       (fn-for-loi (dir-images d))))
-#;
-(define (fn-for-lod lod)
-  (cond [(empty? lod) (...)]
-        [else
-         (... (fn-for-dir (first lod)
-              (fn-for-lod (rest lod))))]))
-#;
-(define (fn-for-loi loi)
-  (cond [(empty? loi) (...)]
-        [else
-         (... (first loi)
-              (fn-for-loi (rest loi)))]))
+(define (fn-for-dir)
+  (local [(define (fn-for--dir d)
+            (... (dir-name d)       
+                 (fn-for--lod (dir-sub-dirs d))
+                 (fn-for--loi (dir-images d))))
+          
+          (define (fn-for--lod lod)
+            (cond [(empty? lod) (...)]
+                  [else
+                   (... (fn-for--dir (first lod)
+                                    (fn-for--lod (rest lod))))]))
+
+          (define (fn-for--loi loi)
+            (cond [(empty? loi) (...)]
+                  [else
+                   (... (first loi)
+                        (fn-for--loi (rest loi)))]))]
+    (fn-for--dir d)))
 
 
 ;; =================
 ;; Functions:
 
 ;; Dir         -> Integer
-;; ListOfDir   -> Integer
-;; ListOfImage -> Integer
 ;; return the total area of images in the directory and all its sub-directories
-(check-expect (area--loi empty) 0)
-(check-expect (area--loi (list I1 I2)) 200)
-(check-expect (area--loi (list I1 I2 I3)) 382)
-(check-expect (area--loi empty) 0)
-(check-expect (area--lod empty) 0)
-(check-expect (area--dir D4) 200)
-(check-expect (area--dir D5) 182)
-(check-expect (area--dir D6) 382)
+(check-expect (area D4) 200)
+(check-expect (area D5) 182)
+(check-expect (area D6) 382)
 
-;(define (area--dir d) 0)   ;stubs
-;(define (area--lod lod) 0)
-;(define (area--loi loi) 0)
+;(define (area d) 0)   ;stub
 
-(define (area--dir d)
-  (+ (area--lod (dir-sub-dirs d))
-       (area--loi (dir-images d))))
+(define (area d)
+  (local [(define (area--dir d)
+            (+ (area--lod (dir-sub-dirs d))
+               (area--loi (dir-images d))))
 
-(define (area--lod lod)
-  (cond [(empty? lod) 0]
-        [else
-         (+ (area--dir (first lod))
-              (area--lod (rest lod)))]))
+          (define (area--lod lod)
+            (cond [(empty? lod) 0]
+                  [else
+                   (+ (area--dir (first lod))
+                      (area--lod (rest lod)))]))
 
-(define (area--loi loi)
-  (cond [(empty? loi) 0]
-        [else (+ (* (image-width (first loi))
-                    (image-height (first loi)))
-                 (area--loi (rest loi)))]))
+          (define (area--loi loi)
+            (cond [(empty? loi) 0]
+                  [else (+ (* (image-width (first loi))
+                              (image-height (first loi)))
+                           (area--loi (rest loi)))]))]
+    (area--dir d)))
 
 
 ;; Dir         -> Image
-;; ListOfDir   -> Image
-;; ListOfImage -> Image
 ;; return a rendeered directory with all its images in it and sub-directories
-(check-expect (render--loi empty) BLANK)
-(check-expect (render--loi (list I1 I2 I3))
-              (above/align "right"
-                           I1
-                           SPACE
-                           I2
-                           SPACE
-                           I3
-                           SPACE
-                           BLANK))
-(check-expect (render--dir D5)
+(check-expect (render D5)
               (beside (text "D5" TEXT-SIZE TEXT-COLOR)
                       BLANK
                       (above/align "right"
                                    I3
                                    SPACE
                                    BLANK)))
-(check-expect (render--dir D6)
+(check-expect (render D6)
               (beside (text "D6" TEXT-SIZE TEXT-COLOR)
                       (above/align "right"
                                    (beside (text "D4" TEXT-SIZE TEXT-COLOR)
@@ -138,25 +121,25 @@
                       BLANK))
 
 
-;(define (render--dir d) BLANK)  ;stubs
-;(define (render--lod d) BLANK)
-;(define (render--loi d) BLANK)
+;(define (render d) BLANK)  ;stub
 
-(define (render--dir d)
-  (beside (text (dir-name d) TEXT-SIZE TEXT-COLOR)       
-       (render--lod (dir-sub-dirs d))
-       (render--loi (dir-images d))))
+(define (render d)
+  (local [(define (render--dir d)
+            (beside (text (dir-name d) TEXT-SIZE TEXT-COLOR)       
+                    (render--lod (dir-sub-dirs d))
+                    (render--loi (dir-images d))))
 
-(define (render--lod lod)
-  (cond [(empty? lod) BLANK]
-        [else
-         (above/align "right"
-                      (render--dir (first lod))
-                      (render--lod (rest lod)))]))
+          (define (render--lod lod)
+            (cond [(empty? lod) BLANK]
+                  [else
+                   (above/align "right"
+                                (render--dir (first lod))
+                                (render--lod (rest lod)))]))
 
-(define (render--loi loi)
-  (cond [(empty? loi) BLANK]
-        [else
-         (above/align "right" (first loi)
-                      SPACE
-                      (render--loi (rest loi)))]))
+          (define (render--loi loi)
+            (cond [(empty? loi) BLANK]
+                  [else
+                   (above/align "right" (first loi)
+                                SPACE
+                                (render--loi (rest loi)))]))]
+    (render--dir d)))
